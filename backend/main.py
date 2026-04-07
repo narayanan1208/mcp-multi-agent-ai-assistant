@@ -9,19 +9,6 @@ app = FastAPI(title="Intelligent MCP Assistant")
 agent = MainAgent()
 
 
-app.mount("/static", StaticFiles(directory="static/static"), name="static")
-
-
-@app.get("/")
-def serve_frontend():
-    return FileResponse("static/index.html")
-
-
-@app.get("/{full_path:path}")
-def serve_spa():
-    return FileResponse("static/index.html")
-
-
 class ChatRequest(BaseModel):
     input: str
 
@@ -56,3 +43,18 @@ def reset():
     session.clear()
     agent.client.call("db", "clear_chat", {})
     return {"status": "cleared"}
+
+
+app.mount("/static", StaticFiles(directory="static/static"), name="static")
+
+
+@app.get("/")
+def serve_frontend():
+    return FileResponse("static/index.html")
+
+
+@app.get("/{full_path:path}")
+def serve_spa(full_path: str):
+    if full_path.startswith("api"):
+        return {"error": "API route not found"}
+    return FileResponse("static/index.html")
